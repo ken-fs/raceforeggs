@@ -188,14 +188,21 @@
         {
           "number": "2",
           "title": "Beginner guide",
-          "description": "Win your first egg",
+          "description": "Your first egg, step by step",
           "icon": "lucide:book-open",
           "href": "/guides/beginner-guide"
         },
         {
           "number": "3",
-          "title": "Pets guide",
-          "description": "Levels, mutations & secrets",
+          "title": "Speed guide",
+          "description": "Train smarter, win races",
+          "icon": "lucide:zap",
+          "href": "/guides/speed-guide"
+        },
+        {
+          "number": "4",
+          "title": "Pets & eggs",
+          "description": "Every pet, egg & mutation",
           "icon": "lucide:cat",
           "href": "/pets/all-pets"
         }
@@ -216,6 +223,35 @@
               "label": "RELEASE",
               "detail": "1 Lizard Pet",
               "badge": "NEW"
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "name": "Pet & egg systems",
+          "description": "What to chase and how it pays",
+          "href": "/pets/all-pets",
+          "displayType": "badge-list",
+          "highlights": [
+            {
+              "label": "Kraken",
+              "detail": "Secret-tier chase pet",
+              "badge": ""
+            },
+            {
+              "label": "T-Rex egg",
+              "detail": "World two egg pool",
+              "badge": ""
+            },
+            {
+              "label": "Gold mutation",
+              "detail": "Creator-reported 1% chance",
+              "badge": ""
+            },
+            {
+              "label": "Speed guide",
+              "detail": "From millions to trillions",
+              "badge": "GUIDE"
             }
           ]
         }
