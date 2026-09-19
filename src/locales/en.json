@@ -1,23 +1,22 @@
 {
   "$schema": "../../docs/home.schema.json",
   "site": {
-    "name": "Anvil Quest Wiki",
-    "shortName": "AQ Wiki",
-    "description": "Complete Anvil Quest wiki with boss guides, tier lists, codes, item locations, and beginner tips. Every guide carries a last-verified date.",
-    "tagline": "Your forge for everything Anvil Quest",
-    "legalNotice": "Anvil Quest Wiki is a fan-made community site. Not affiliated with or endorsed by the game developer."
+    "name": "Race for Eggs Wiki",
+    "shortName": "Race for Eggs",
+    "description": "Race for Eggs guides: every pet ranked, egg lists, working codes, and speed training strategies for the Roblox racing simulator.",
+    "tagline": "Train fast. Race faster. Hatch the best pets.",
+    "legalNotice": "Fan-made resource. Not affiliated with xFrozen x Dudes or Roblox Corporation."
   },
   "nav": {
     "home": "Home",
-    "bosses": "Bosses",
-    "guides": "Guides",
-    "items": "Items",
-    "codes": "Codes",
     "toggleTheme": "Toggle theme",
     "menu": "Menu",
     "close": "Close",
     "search": "Search",
-    "language": "Language"
+    "language": "Language",
+    "codes": "Codes",
+    "pets": "Pets",
+    "guides": "Guides"
   },
   "search": {
     "placeholder": "Search the wiki...",
@@ -122,282 +121,127 @@
     "paginationAria": "Article pagination"
   },
   "overview": {
-    "bosses": {
-      "overviewTitle": "All Bosses",
-      "overviewDescription": "Complete strategy guides for every boss in Anvil Quest, including attack patterns, weaknesses, and recommended loadouts."
+    "codes": {
+      "overviewTitle": "All Codes",
+      "overviewDescription": "Every working Race for Eggs code, cross-checked and dated. Free pets like the Lizard start earning cash from your first session — updated after each Saturday patch."
+    },
+    "pets": {
+      "overviewTitle": "All Pets",
+      "overviewDescription": "How Race for Eggs pets work: eggs from races, cash income, pet levels, mutations, and the secret pets at the top of the chase."
     },
     "guides": {
       "overviewTitle": "All Guides",
-      "overviewDescription": "In-depth tutorials covering progression, crafting, combat mechanics, and advanced strategies for Anvil Quest."
-    },
-    "items": {
-      "overviewTitle": "All Items",
-      "overviewDescription": "Comprehensive item database with locations, stats, rarity tiers, and crafting recipes."
-    },
-    "codes": {
-      "overviewTitle": "All Codes",
-      "overviewDescription": "Active Anvil Quest codes for free coins, gems, and exclusive items. Verified daily."
+      "overviewDescription": "Race for Eggs guides: first-hour strategy, speed training, rebirth multipliers, and progression — dated and re-checked after updates."
     }
   },
   "home": {
     "meta": {
-      "title": "Anvil Quest Wiki - Complete Boss Guides, Codes & Tier Lists",
-      "description": "The most complete Anvil Quest wiki. Boss strategies, active codes, item locations, tier lists, and beginner guides. Every page shows when it was last verified."
-    },
-    "hero": {
-      "badge": "Fan-Made Community Wiki",
-      "title": "Anvil Quest Wiki",
-      "description": "Your complete guide to Anvil Quest. Boss strategies, active codes, item locations, tier lists, and everything you need to master the forge.",
-      "ctaPrimary": "Play Anvil Quest",
-      "ctaSecondary": "Browse Guides",
-      "videoId": ""
+      "title": "Race for Eggs Wiki — Codes, Guides & Tier Lists",
+      "description": "Race for Eggs guides: every pet ranked, egg lists, working codes, and speed training strategies for the Roblox racing simulator."
     },
     "updates": {
-      "title": "Recent Updates"
+      "title": "Recent updates"
+    },
+    "popular": {
+      "badge": "Popular",
+      "title": "Most read",
+      "quickLinks": [
+        {
+          "label": "Codes",
+          "href": "/codes"
+        },
+        {
+          "label": "Pets",
+          "href": "/pets"
+        },
+        {
+          "label": "Guides",
+          "href": "/guides"
+        }
+      ]
+    },
+    "closingCta": {
+      "title": "Start your Race for Eggs journey",
+      "description": "Bookmark this wiki and check back after every game update.",
+      "primary": "Browse all",
+      "secondary": "Join the community"
+    },
+    "hero": {
+      "badge": "Fan-made wiki",
+      "title": "Race for Eggs Codes",
+      "description": "All working Race for Eggs codes with expiry dates, plus guides and tier lists.",
+      "ctaPrimary": "Play now",
+      "ctaSecondary": "Browse guides",
+      "videoId": ""
     },
     "start": {
-      "badge": "Start Here",
-      "title": "Your Anvil Quest Journey",
+      "badge": "Quick start",
+      "title": "Jump straight in",
       "cards": [
         {
           "number": "1",
-          "title": "Beginner Guide",
-          "description": "New to Anvil Quest? Start here with the essential mechanics, controls, and your first hour walkthrough.",
+          "title": "Codes",
+          "description": "Free Lizard pet right now",
+          "icon": "lucide:gift",
+          "href": "/codes/all-codes"
+        },
+        {
+          "number": "2",
+          "title": "Beginner guide",
+          "description": "Win your first egg",
           "icon": "lucide:book-open",
           "href": "/guides/beginner-guide"
         },
         {
-          "number": "2",
-          "title": "Active Codes",
-          "description": "Redeem the latest codes for free coins, gems, and exclusive cosmetic items.",
-          "icon": "lucide:gift",
-          "href": "/codes"
-        },
-        {
           "number": "3",
-          "title": "Boss Strategies",
-          "description": "Complete guides for every boss with attack patterns, weaknesses, and recommended loadouts.",
-          "icon": "lucide:swords",
-          "href": "/bosses"
-        },
-        {
-          "number": "4",
-          "title": "Weapon Tier List",
-          "description": "Ranking every weapon from S to C based on DPS, utility, and synergy.",
-          "icon": "lucide:list-ordered",
-          "href": "/guides/weapon-tier-list"
-        }
-      ]
-    },
-    "popular": {
-      "badge": "Trending Now",
-      "title": "Most Read This Week",
-      "quickLinks": [
-        {
-          "label": "Emberfang Boss Guide",
-          "href": "/bosses/emberfang"
-        },
-        {
-          "label": "Best Weapons Tier List",
-          "href": "/guides/weapon-tier-list"
-        },
-        {
-          "label": "Beginner Guide",
-          "href": "/guides/beginner-guide"
-        },
-        {
-          "label": "All Active Codes",
-          "href": "/codes"
+          "title": "Pets guide",
+          "description": "Levels, mutations & secrets",
+          "icon": "lucide:cat",
+          "href": "/pets/all-pets"
         }
       ]
     },
     "explore": {
-      "title": "Explore the Wiki",
-      "description": "Everything you need, organized by category. Pick a topic and dive in.",
+      "title": "Explore",
+      "description": "The essentials",
       "modules": [
         {
           "order": 1,
-          "name": "Anvil Quest Codes",
-          "description": "Active codes for free coins, gems, and exclusive items. Updated daily.",
-          "href": "/codes",
+          "name": "Active codes",
+          "description": "1 code working as of Sep 19 — free Lizard pet",
+          "href": "/codes/all-codes",
           "displayType": "badge-list",
           "highlights": [
             {
-              "label": "FORGE-2026",
-              "detail": "+500 Gold · expires Aug 31",
-              "badge": "Active"
-            },
-            {
-              "label": "EMBERBORN",
-              "detail": "2× XP (30 min) · expires Aug 31",
-              "badge": "Active"
-            },
-            {
-              "label": "ASHENKEEP",
-              "detail": "Ashen Keep cosmetic set",
-              "badge": "Active"
-            }
-          ]
-        },
-        {
-          "order": 2,
-          "name": "Boss Strategies",
-          "description": "Complete guides for every boss with attack patterns and weaknesses.",
-          "href": "/bosses",
-          "displayType": "labeled-cards",
-          "highlights": [
-            {
-              "label": "Emberfang",
-              "detail": "Frost warden, early-game gatekeeper"
-            },
-            {
-              "label": "Stormcaller",
-              "detail": "Fire titan, mid-game DPS check"
-            },
-            {
-              "label": "Voidking",
-              "detail": "Final boss, requires full prep"
-            }
-          ]
-        },
-        {
-          "order": 3,
-          "name": "Progression Guides",
-          "description": "Leveling routes, class builds, and endgame preparation.",
-          "href": "/guides",
-          "displayType": "steps",
-          "highlights": [
-            {
-              "label": "1",
-              "detail": "Pick a starting class"
-            },
-            {
-              "label": "2",
-              "detail": "Clear the tutorial forge"
-            },
-            {
-              "label": "3",
-              "detail": "Unlock the Shattered Isles"
-            },
-            {
-              "label": "4",
-              "detail": "Defeat your first world boss"
-            }
-          ]
-        },
-        {
-          "order": 4,
-          "name": "Weapon Tier List",
-          "description": "Ranking every weapon from S to C based on DPS, utility, and synergy.",
-          "href": "/guides/weapon-tier-list",
-          "displayType": "ranked-grid",
-          "highlights": [
-            {
-              "label": "S",
-              "detail": "Voidforge Blade, Stormcaller"
-            },
-            {
-              "label": "A",
-              "detail": "Emberclaw, Frostpike"
-            },
-            {
-              "label": "B",
-              "detail": "Ironwood Bow, Mace of Dawn"
-            },
-            {
-              "label": "C",
-              "detail": "Starter weapons"
-            }
-          ]
-        },
-        {
-          "order": 5,
-          "name": "Update History",
-          "description": "Major patches and events, newest first.",
-          "href": "/recent",
-          "displayType": "timeline",
-          "highlights": [
-            {
-              "label": "v2.5",
-              "detail": "New raid: Shadowforge released",
-              "badge": "Latest"
-            },
-            {
-              "label": "v2.4",
-              "detail": "Rebalanced all S-tier weapons"
-            },
-            {
-              "label": "v2.3",
-              "detail": "Added 3 new bosses"
-            },
-            {
-              "label": "v2.2",
-              "detail": "Launched season pass system"
-            }
-          ]
-        },
-        {
-          "order": 6,
-          "name": "Video Guides",
-          "description": "Watch the best Anvil Quest walkthroughs and boss fights.",
-          "href": "/guides",
-          "displayType": "video-grid",
-          "highlights": [
-            {
-              "title": "Beginner Walkthrough",
-              "youtubeId": "dQw4w9WgXcQ",
-              "duration": "12:34"
-            },
-            {
-              "title": "All Bosses Ranked",
-              "youtubeId": "aaaaaaaaaaa",
-              "duration": "18:42"
-            },
-            {
-              "title": "Speedrun Guide",
-              "youtubeId": "bbbbbbbbbbb",
-              "duration": "25:10"
-            },
-            {
-              "title": "Hidden Secrets",
-              "youtubeId": "ccccccccccc",
-              "duration": "9:15"
+              "label": "RELEASE",
+              "detail": "1 Lizard Pet",
+              "badge": "NEW"
             }
           ]
         }
       ]
     },
     "faq": {
-      "title": "Frequently Asked Questions",
-      "description": "Quick answers to the most common questions about Anvil Quest.",
+      "title": "FAQ",
+      "description": "Common questions",
       "items": [
         {
-          "question": "What is Anvil Quest?",
-          "answer": "Anvil Quest is a fantasy RPG on Roblox where you play as a blacksmith apprentice forging weapons and battling bosses across the Shattered Isles. It launched in January 2026 and has over 12 million visits."
+          "question": "What are the working Race for Eggs codes?",
+          "answer": "One code is working as of September 19, 2026: RELEASE, which grants a free Lizard pet that earns cash from your first session. New codes tend to arrive with the Saturday updates — see the codes page for the current list."
         },
         {
-          "question": "Which class should beginners pick in Anvil Quest?",
-          "answer": "Warrior is the most beginner-friendly class thanks to high HP and simple mechanics. Once you understand the game, Rogue offers the highest damage output for experienced players."
+          "question": "How do I get pets in Race for Eggs?",
+          "answer": "Win races to earn eggs, then hatch them into pets. Winning is the only repeatable egg source — carrying an egg slows you down, so a course becomes farmable once you can win it while holding the egg."
         },
         {
-          "question": "How do I redeem codes in Anvil Quest?",
-          "answer": "Open the game, click the settings gear in the top-right, paste your code into the 'Redeem Code' field, and hit confirm. Codes are case-sensitive."
+          "question": "What does rebirth do in Race for Eggs?",
+          "answer": "Rebirth trades current progress for a permanent cash multiplier — creator footage shows multipliers past 512× the base rate at high rebirth counts. The rule of thumb: rebirth when rebuilding will be faster than continuing the grind."
         },
         {
-          "question": "Is Anvil Quest free to play?",
-          "answer": "Yes, Anvil Quest is completely free on Roblox. There are optional cosmetic microtransactions, but they do not affect gameplay balance."
-        },
-        {
-          "question": "How often does Anvil Quest update?",
-          "answer": "Forge Studios releases major content updates roughly every two weeks, with smaller hotfixes in between. New bosses and codes are typically added with each major patch."
+          "question": "Is Race for Eggs free to play?",
+          "answer": "Yes — the core loop is fully playable free. The shop sells acceleration (potions, packs) and Roblox Plus accounts earn +10% cash, but racing and eggs are earned, not bought."
         }
       ]
-    },
-    "closingCta": {
-      "title": "Ready to Master the Forge?",
-      "description": "Bookmark this wiki and check back daily for new codes, boss guides, and tier list updates.",
-      "primary": "Play Anvil Quest",
-      "secondary": "Join Our Discord"
     }
   },
   "footer": {
@@ -412,7 +256,7 @@
     "termsOfService": "Terms of Service",
     "copyright": "Copyright",
     "contact": "Contact",
-    "copyrightText": "© 2026 Anvil Quest Wiki. Fan-made, not affiliated with Forge Studios.",
+    "copyrightText": "© 2026 Race for Eggs Wiki. All rights reserved.",
     "community": "Community",
     "legal": "Legal"
   }

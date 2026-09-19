@@ -28,6 +28,10 @@ runs:
     - name: Config consistency (nav/locale 3-place check)
       run: pnpm check-config
       shell: bash
+      env:
+        # Forks that dropped wrangler.toml (Workers-style wrangler.jsonc +
+        # build-command SITE_URL): check-config needs the env directly.
+        SITE_URL: ${{ inputs.site-url }}
 
     - name: Build
       run: pnpm build

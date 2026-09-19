@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import type { Locale } from '~/i18n/routing';
 import { videoObjectJsonLd, urlListJsonLd, imageObjectJsonLd } from '~/lib/seo';
 import { slugifyTag, tagPath, tagsPath, recentPath } from '~/lib/url';
 
@@ -24,6 +25,8 @@ describe('slugifyTag', () => {
   });
 });
 
+const ja = 'ja' as Locale;
+
 describe('tag/recent URL helpers', () => {
   it('builds unprefixed English paths', () => {
     expect(tagsPath('en')).toBe('/tags/');
@@ -31,9 +34,9 @@ describe('tag/recent URL helpers', () => {
     expect(recentPath('en')).toBe('/recent/');
   });
   it('prefixes non-default locales', () => {
-    expect(tagsPath('ja')).toBe('/ja/tags/');
-    expect(tagPath('fire-boss', 'ja')).toBe('/ja/tags/fire-boss/');
-    expect(recentPath('ja')).toBe('/ja/recent/');
+    expect(tagsPath(ja)).toBe('/ja/tags/');
+    expect(tagPath('fire-boss', ja)).toBe('/ja/tags/fire-boss/');
+    expect(recentPath(ja)).toBe('/ja/recent/');
   });
 });
 

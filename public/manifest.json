@@ -1,11 +1,11 @@
 {
-  "name": "Anvil Quest Wiki",
-  "short_name": "AQ Wiki",
-  "description": "Complete Anvil Quest wiki with boss guides, codes, and tier lists.",
+  "name": "Race for Eggs Wiki",
+  "short_name": "Race for Eggs",
+  "description": "Race for Eggs guides: every pet ranked, egg lists, working codes, and speed training strategies for the Roblox racing simulator.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#f36716",
+  "theme_color": "#16a249",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
