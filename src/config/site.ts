@@ -65,7 +65,7 @@ export const site: SiteConfig = {
   name: 'Race for Eggs Wiki',
   shortName: 'Race for Eggs',
   description: 'Race for Eggs guides: every pet ranked, egg lists, working codes, and speed training strategies for the Roblox racing simulator.',
-  domain: 'raceforeggs.com',
+  domain: 'raceforeggs.site',
   tagline: 'Train fast. Race faster. Hatch the best pets.',
   legalNotice: 'Fan-made resource. Not affiliated with xFrozen x Dudes or Roblox Corporation.',
   // Set a real address if you run no social channels — the contact page

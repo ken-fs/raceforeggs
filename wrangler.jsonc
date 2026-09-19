@@ -3,7 +3,7 @@
   "name": "raceforeggs",
   "compatibility_date": "2026-09-19",
   // Static site: Astro emits ./dist, served directly as assets.
-  // Build:  SITE_URL=https://raceforeggs.com pnpm run build
+  // Build:  SITE_URL=https://raceforeggs.site pnpm run build
   // Deploy: npx wrangler deploy
   // SITE_URL is BUILD-time only (astro.config.ts reads process.env at build);
   // pass it on the build command line or via the Workers Builds dashboard env.

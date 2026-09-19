@@ -2,7 +2,7 @@
 
 Roblox《Race for Eggs》的粉丝 wiki 与攻略站。
 
-**线上**：https://raceforeggs.com · **部署**：Cloudflare Workers（static assets）· **模板**：[AnvilWiki](https://github.com/PNGTRID/AnvilWiki)（MIT）
+**线上**：https://raceforeggs.site · **部署**：Cloudflare Workers（static assets）· **模板**：[AnvilWiki](https://github.com/PNGTRID/AnvilWiki)（MIT）
 
 ---
 
@@ -33,7 +33,7 @@ pnpm install
 pnpm dev            # http://localhost:4321
 
 # 生产构建（SITE_URL 是构建时变量，必须带上）
-SITE_URL=https://raceforeggs.com pnpm build
+SITE_URL=https://raceforeggs.site pnpm build
 pnpm preview        # 预览 dist/
 ```
 
@@ -59,7 +59,7 @@ pnpm check-content      # 内容 lint（frontmatter/内链/长度）
 pnpm check-links        # 全站内链审计
 pnpm gen-covers         # 用标题+品牌色生成封面并写入 frontmatter
 pnpm new-post           # 交互式新建文章
-pnpm submit-indexnow -- --site https://raceforeggs.com   # 推送 URL 给 Bing/Yandex
+pnpm submit-indexnow -- --site https://raceforeggs.site   # 推送 URL 给 Bing/Yandex
 ```
 
 **数据来源纪律**：codes 用 ≥2 个新鲜源交叉验证（GameRant / 创作者视频 / 竞品站核对）；游戏机制用官方描述 + 多个创作者视频共识；来源写进 frontmatter 的 `codes[].source` 或正文。游戏**每周六更新**——更新后必须刷新 codes 页并检查是否有新内容。
@@ -68,7 +68,7 @@ pnpm submit-indexnow -- --site https://raceforeggs.com   # 推送 URL 给 Bing/Y
 
 **Cloudflare Workers Builds（Git 集成）**：push 到 `main` → 自动构建 → 部署。**本地 `wrangler deploy` 只是临时生效，会被下一次 Git 构建覆盖——任何改动必须 commit + push。**
 
-- Build command（dashboard 里配置）：`SITE_URL=https://raceforeggs.com pnpm run build`
+- Build command（dashboard 里配置）：`SITE_URL=https://raceforeggs.site pnpm run build`
 - Deploy command：`npx wrangler deploy`
 - 输出目录：`dist/`（由 `wrangler.jsonc` 的 `assets.directory` 指定）
 
@@ -84,7 +84,7 @@ pnpm submit-indexnow -- --site https://raceforeggs.com   # 推送 URL 给 Bing/Y
 
 | 配置 | 位置 | 当前值 |
 | --- | --- | --- |
-| 站点标识/域名 | `src/config/site.ts` | Race for Eggs Wiki · raceforeggs.com |
+| 站点标识/域名 | `src/config/site.ts` | Race for Eggs Wiki · raceforeggs.site |
 | 主题色 | `src/styles/globals.css` | `#16a34a` |
 | 导航/分类 | `src/config/navigation.ts` | codes / pets / guides |
 | 首页模块 | `src/locales/en.json` → `home` | hero/start/explore/faq |
@@ -94,7 +94,7 @@ pnpm submit-indexnow -- --site https://raceforeggs.com   # 推送 URL 给 Bing/Y
 
 | 项 | 地址 |
 | --- | --- |
-| GSC 属性 | `sc-domain:raceforeggs.com`（待接入） |
+| GSC 属性 | `sc-domain:raceforeggs.site`（待接入） |
 | Cloudflare | Workers & Pages → raceforeggs（待接线） |
 | 验收 | `node ~/Desktop/david/Ship/scripts/verify.mjs`（待加入基线） |
 | 上游模板 | https://github.com/PNGTRID/AnvilWiki |
