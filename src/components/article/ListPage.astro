@@ -9,6 +9,7 @@ import { Icon } from 'astro-icon/components';
 import LocaleLayout from '~/components/layout/LocaleLayout.astro';
 import ArticleCover from '~/components/article/ArticleCover.astro';
 import { NAVIGATION_CONFIG } from '~/config/navigation';
+import { siteUrl } from '~/config/site';
 import { type Locale } from '~/i18n/routing';
 import { getUi } from '~/i18n/ui';
 import { getEntriesByCategory, parseEntryId } from '~/lib/content';
@@ -40,6 +41,15 @@ const description =
   `${title}`;
 
 const entries = await getEntriesByCategory(category, locale);
+
+// A category with a single article makes this hub a thin duplicate of that
+// article (the codes hub pulled 1.6k impressions in Sep-Oct 2026 while the
+// actual codes article got 32 — the two were splitting one intent). Point the
+// hub's canonical at the article so ranking signals consolidate there.
+const soleArticleSlug = entries.length === 1 ? parseEntryId(entries[0].id)?.slug : undefined;
+const canonical = soleArticleSlug
+  ? new URL(detailPath(category, soleArticleSlug, locale), siteUrl).href
+  : undefined;
 
 const jsonLd = [
   // Empty ItemList (itemListElement: []) is invalid structured data — only
@@ -74,6 +84,7 @@ const jsonLd = [
   title={pageTitle(title)}
   description={description}
   alternates={alternates}
+  canonical={canonical}
   jsonLd={jsonLd}
   noindex={entries.length === 0}
 >

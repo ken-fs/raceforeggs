@@ -33,6 +33,13 @@ interface Props {
   /** When true, emit <meta name="robots" content="noindex"> to exclude from search. */
   noindex?: boolean;
   /**
+   * Absolute canonical URL override. Used by single-article hub pages, which
+   * are thin duplicates of their only child article — pointing the hub's
+   * canonical at the article consolidates signals on one URL instead of two
+   * ranking against each other.
+   */
+  canonical?: string;
+  /**
    * Real dimensions of `image` (px). Omitted for article covers whose size we
    * don't know — a WRONG og:image:width/height makes scrapers mis-crop the
    * share card; absent metas let them measure the image themselves.
@@ -80,6 +87,7 @@ const {
   jsonLd = [],
   article = false,
   noindex = false,
+  canonical,
   titleSuffix,
   ogImageWidth,
   ogImageHeight,
@@ -176,7 +184,7 @@ const privacyLabel = consent?.privacyLabel ?? footerStrings.privacyPolicy ?? 'Pr
          without this, covers never surface as large preview images (v2.0). */
       <meta name="robots" content="max-image-preview:large" />
     )}
-    <link rel="canonical" href={new URL(Astro.url.pathname, siteUrl).href} />
+    <link rel="canonical" href={canonical ?? new URL(Astro.url.pathname, siteUrl).href} />
 
     {/* hreflang alternates */}
     {alternates.map((alt) => <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />)}
@@ -204,7 +212,7 @@ const privacyLabel = consent?.privacyLabel ?? footerStrings.privacyPolicy ?? 'Pr
         </>
       ) : null
     }
-    <meta property="og:url" content={new URL(Astro.url.pathname, siteUrl).href} />
+    <meta property="og:url" content={canonical ?? new URL(Astro.url.pathname, siteUrl).href} />
     <meta property="og:site_name" content={site.name} />
     {/* OG wants language_TERRITORY (en_US / ja_JP), not a bare ISO code. */}
     <meta property="og:locale" content={ogLocale} />

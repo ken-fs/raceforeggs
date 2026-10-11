@@ -21,6 +21,8 @@ interface Props {
   jsonLd?: Record<string, unknown>[];
   article?: boolean;
   noindex?: boolean;
+  /** Absolute canonical URL override (forwarded to BaseLayout). */
+  canonical?: string;
   /** Locales this page exists in — passed to the language switcher (tag pages). */
   availableLocales?: readonly Locale[];
   /** Locale of the MAIN content (servedLocale) — fixes <html lang> on fallback pages. */

@@ -136,7 +136,7 @@
   },
   "home": {
     "meta": {
-      "title": "Race for Eggs Wiki — Codes, Guides & Tier Lists",
+      "title": "Race for Eggs Wiki — Pets, Eggs & Speed Guides",
       "description": "Race for Eggs guides: every pet ranked, egg lists, working codes, and speed training strategies for the Roblox racing simulator."
     },
     "updates": {
@@ -168,8 +168,8 @@
     },
     "hero": {
       "badge": "Fan-made wiki",
-      "title": "Race for Eggs Codes",
-      "description": "All working Race for Eggs codes with expiry dates, plus guides and tier lists.",
+      "title": "Race for Eggs Wiki",
+      "description": "Pet, egg, speed and rebirth guides for the Roblox racing simulator — plus a code list re-checked after every Saturday patch.",
       "ctaPrimary": "Play now",
       "ctaSecondary": "Browse guides",
       "videoId": ""
