@@ -57,7 +57,14 @@ const STOP = new Set(
 
 const log = (msg) => appendFileSync(LOG, `${new Date().toISOString()} ${msg}\n`);
 
+const PUSH_SCRIPT = new URL('../../scripts/notify.mjs', import.meta.url).pathname;
+
 function notify(title, body, sound = 'Glass') {
+  // 先推飞书（Ship/scripts/notify.mjs，2026-10-11 加：用户不在电脑前会漏 macOS 通知）；推不出去再走下面的 macOS 通知。
+  try {
+    execFileSync(process.execPath, [PUSH_SCRIPT, '--title', String(title), '--body', String(body)], { stdio: 'ignore', timeout: 30000 });
+    return;
+  } catch {}
   const esc = (s) => String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"').slice(0, 220);
   try {
     execFileSync('osascript', [
