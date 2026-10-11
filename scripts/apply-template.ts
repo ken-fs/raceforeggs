@@ -58,6 +58,7 @@ import {
   rerunPromptDefaults,
   rewriteLocaleJson,
   rewriteSiteTs as rewriteSiteTsBlock,
+  rewriteWranglerName,
   rewriteWranglerVars,
   slugify,
   tsEscape,
@@ -873,8 +874,20 @@ async function main() {
     ? rewriteWranglerVars(skinInput, read('wrangler.toml'))
     : null;
   if (wrangler !== null) {
-    write('wrangler.toml', wrangler);
+    // 同时重写工作器名：cp 旧站建新站时 wrangler 配置里的 name 还是旧站的，
+    // 不重写会把新站部署到旧站的 Worker 上（2026-10-11 实例：raceforeggs 被覆盖）。
+    const named = rewriteWranglerName(skinInput, wrangler) ?? wrangler;
+    write('wrangler.toml', named);
     console.log('   ✅ wrangler.toml ([vars] reset — demo Giscus config cleared)');
+  }
+
+  // Modern forks ship wrangler.jsonc (no .toml): rewrite its Worker name too.
+  if (fs.existsSync(path.resolve(ROOT, 'wrangler.jsonc'))) {
+    const named = rewriteWranglerName(skinInput, read('wrangler.jsonc'));
+    if (named !== null) {
+      write('wrangler.jsonc', named);
+      console.log('   ✅ wrangler.jsonc (Worker name set from the domain)');
+    }
   }
 
   // Reset the demo author registry so fork sites don't inherit demo authors.

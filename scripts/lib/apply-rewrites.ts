@@ -502,6 +502,37 @@ export function rewriteLocaleJson(
 
 
 /**
+ * Rewrite the Worker `name` in wrangler.jsonc / wrangler.toml to a slug
+ * derived from the fork's domain.
+ *
+ * Why this exists: a fork created by copying an existing site keeps that
+ * site's Worker name in the wrangler config (apply-template rewrote [vars]
+ * in wrangler.toml but never the name — and modern forks ship wrangler.jsonc,
+ * which was not touched at all). Two forks both deploying "name": "raceforeggs"
+ * overwrite the ORIGINAL site's Worker on every push: the 2026-10-11 incident
+ * where raceforeggs.site briefly served an EmberQuest page. Deriving the name
+ * from the domain (the answer the CLI already collects) needs no new prompt
+ * and keeps the 18-answer answers.json contract intact.
+ */
+export function rewriteWranglerName(input: { domain: string }, src: string): string | null {
+  // First label of the domain, lowercased, invalid characters → hyphen.
+  // Worker names: lowercase alphanumerics and hyphens, ≤63 chars.
+  const slug = input.domain
+    .split('.')[0]
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 63);
+  if (!slug) return null;
+  const jsoncRe = /("name"\s*:\s*)"[^"]*"/;
+  if (jsoncRe.test(src)) return src.replace(jsoncRe, `$1"${slug}"`);
+  const tomlRe = /^(name\s*=\s*)"[^"]*"/m;
+  if (tomlRe.test(src)) return src.replace(tomlRe, `$1"${slug}"`);
+  console.warn('⚠️ Could not find a Worker name field — set it manually before deploying.');
+  return null;
+}
+
+/**
  * Reset wrangler.toml [vars] for the forker's own site.
  *
  * Why: when wrangler.toml exists it is the SOLE source of truth for the
