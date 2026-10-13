@@ -214,35 +214,45 @@ if (!prev) {
   process.exit(0);
 }
 
+// 2026-10-13：变化交给自动更新引擎（Ship/scripts/autopilot）——它多源确认后改数据、构建、上线，再推飞书说改了什么；
+// 引擎不在才退回原来的「请手动更新」通知
+async function handoff(reason, fallback) {
+  try {
+    const { trigger } = await import(join(SHIP, 'scripts', 'autopilot', 'trigger.mjs'));
+    if (trigger('raceforeggs', reason)) { log(`AUTOPILOT ${reason}`); return; }
+  } catch {}
+  fallback();
+}
+
 const changed = ['name', 'description', 'updated', 'shout'].filter((k) => prev.game?.[k] !== now[k]);
 if (changed.length) {
   const isUpdate = changed.includes('updated') || changed.includes('description');
   for (const k of changed) {
     log(`CHANGED ${k}: ${JSON.stringify(String(prev.game?.[k] ?? '').slice(0, 120))} → ${JSON.stringify(String(now[k]).slice(0, 120))}`);
   }
-  notify(
+  await handoff(`Race for Eggs ${isUpdate ? '游戏更新' : '数据源变化'}（${changed.join('/')}${changed.includes('shout') ? `，群组公告：${now.shout.slice(0, 150)}` : ''}）`, () => notify(
     isUpdate ? '🆕 Race for Eggs 更新' : '数据源有变化',
     `${changed.join('/')} 变化 → 查新码并同步 /codes/all-codes/（正文 ${pageLastModified ?? '?'}）`,
     isUpdate ? 'Glass' : 'Blow',
-  );
+  ));
 }
 
 if (stalePage) {
   log(`STALE_CODES page ${pageLastModified} < game ${gameDay}`);
-  notify(
+  await handoff(`codes 页 ${pageLastModified} 落后于游戏更新 ${gameDay}`, () => notify(
     '🔔 codes 页落后于游戏更新',
     `页面 ${pageLastModified}，游戏已更新到 ${gameDay} → 同步新码/日期（三源确认后改 all-codes.mdx）`,
     'Glass',
-  );
+  ));
 }
 
 if (newCandidates.length) {
   log(`🚨 NEW_CODES ${newCandidates.join(' ')}`);
-  notify(
+  await handoff(`码源出现本站没有的码 ${newCandidates.slice(0, 8).join(' ')}`, () => notify(
     '🚨 新码待确认',
     `${newCandidates.slice(0, 8).join(' ')} → 双源确认后补进 all-codes.mdx（含标题日期）`,
     'Sosumi',
-  );
+  ));
 }
 
 if (gone.length) log(`GONE ${gone.join(' ')}（所有成功抓取的源都不再列出，人工确认后标过期）`);
