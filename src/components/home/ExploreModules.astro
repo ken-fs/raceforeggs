@@ -17,6 +17,13 @@
  * hover border feedback, replacing the cramped "View" link that sat on the
  * same line as the title. The whole tile navigates; an arrow in the footer
  * signals affordance.
+ *
+ * badge-list modules that link to a codes page read that page's `codes:`
+ * frontmatter (active codes, page order, first 4) instead of the hand-typed
+ * `highlights` in the locale JSON. 2026-10-13: commandanarmy's homepage kept
+ * showing OPTIMIZE / WAR as NEW a day after the codes page marked them
+ * expired — the JSON copy never follows the page. `highlights` stays as the
+ * fallback for modules whose href is not a codes page.
  */
 import { Icon } from 'astro-icon/components';
 import CodeCards from './modules/CodeCards.astro';
@@ -28,6 +35,7 @@ import VideoGrid from './modules/VideoGrid.astro';
 import { type Locale } from '~/i18n/routing';
 import { localizePath } from '~/lib/url';
 import { getUi } from '~/i18n/ui';
+import { getEntryWithFallback } from '~/i18n/content';
 
 interface Props {
   modules: Array<{
@@ -46,11 +54,25 @@ interface Props {
 const { modules, locale } = Astro.props;
 const sharedStrings = getUi(locale).shared;
 const viewAll = sharedStrings.viewAll ?? 'View all';
+
+async function liveCodes(href: string) {
+  const [category, slug] = href.replace(/^\/+|\/+$/g, '').split('/');
+  if (!category || !slug) return null;
+  const codes = (await getEntryWithFallback(category, slug, locale))?.entry.data.codes;
+  if (!codes?.length) return null;
+  return codes
+    .filter((c) => c.status === 'active')
+    .slice(0, 4)
+    .map((c) => ({ label: c.code, detail: c.reward ?? '', badge: /\bNEW\b/.test(c.source ?? '') ? 'NEW' : '' }));
+}
+const resolved = await Promise.all(
+  modules.map(async (m) => (m.displayType === 'badge-list' ? { ...m, highlights: (await liveCodes(m.href)) ?? m.highlights } : m)),
+);
 ---
 
 <div class="grid gap-6 md:grid-cols-2">
   {
-    modules.map((m) => (
+    resolved.map((m) => (
       <a href={localizePath(m.href, locale)} class="card group block overflow-hidden p-5">
         <h3 class="text-lg font-bold leading-snug">{m.name}</h3>
         <p class="mt-1 text-sm text-muted-foreground">{m.description}</p>
