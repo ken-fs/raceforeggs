@@ -5,7 +5,7 @@
  */
 import TagListPage from '~/components/article/TagListPage.astro';
 import { defaultLocale, isLocale, locales, type Locale } from '~/i18n/routing';
-import { slugifyTag, localesForTag, parseEntryId } from '~/lib/content';
+import { slugifyTag, localesForTag, parseEntryId, getTagRedirects } from '~/lib/content';
 import { languageAlternates, tagPath } from '~/lib/url';
 
 export async function getStaticPaths() {
@@ -26,7 +26,10 @@ export async function getStaticPaths() {
         if (slug) slugs.add(slug); // skip empty-string slugs (blank tags)
       }
     }
+    // Folded tags get a 301 to their article instead of a page (lib/tag-redirects.ts).
+    const folded = await getTagRedirects(locale);
     for (const tagSlug of slugs) {
+      if (folded.has(tagSlug)) continue;
       paths.push({ params: { locale, tag: tagSlug } });
     }
   }
@@ -41,7 +44,7 @@ if (!isLocale(localeParam) || localeParam === defaultLocale || !tagSlug) {
 const locale: Locale = localeParam;
 
 // hreflang only for locales where the tag actually exists (no fallback).
-const tagLocales = await localesForTag(tagSlug);
+const tagLocales = await localesForTag(tagSlug, { pagesOnly: true });
 const alternates = languageAlternates((loc) => tagPath(tagSlug, loc), tagLocales);
 ---
 

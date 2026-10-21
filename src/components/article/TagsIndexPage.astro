@@ -8,7 +8,7 @@ import { Icon } from 'astro-icon/components';
 import LocaleLayout from '~/components/layout/LocaleLayout.astro';
 import { type Locale } from '~/i18n/routing';
 import { getUi } from '~/i18n/ui';
-import { getTagsWithCounts, slugifyTag } from '~/lib/content';
+import { getTagRedirects, getTagsWithCounts, slugifyTag } from '~/lib/content';
 import { pageTitle, simpleBreadcrumbJsonLd } from '~/lib/seo';
 import { homeUrl, tagPath, tagsPath } from '~/lib/url';
 
@@ -24,7 +24,10 @@ const shared = ui.shared;
 const title = shared.allTags;
 const description = shared.tagsIndexDescription;
 
-const tags = await getTagsWithCounts(locale);
+// Folded tags have no page of their own (they 301 to their article) — the
+// index only lists real hub tags.
+const folded = await getTagRedirects(locale);
+const tags = (await getTagsWithCounts(locale)).filter(({ tag }) => !folded.has(slugifyTag(tag)));
 
 const jsonLd = simpleBreadcrumbJsonLd({ pageLabel: title, path: tagsPath(locale), locale, homeLabel: nav.home });
 ---

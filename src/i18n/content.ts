@@ -17,7 +17,8 @@
 
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { defaultLocale, type Locale } from './routing';
-import { slugifyTag } from '~/lib/url';
+import { detailPath, slugifyTag, tagPath } from '~/lib/url';
+import { computeTagRedirects, type TagTarget } from '~/lib/tag-redirects';
 import { selectRelatedEntries, newestFirst } from '~/lib/content-utils';
 
 export type WikiEntry = CollectionEntry<'wiki'>;
@@ -212,7 +213,7 @@ export async function getEntriesByTag(tagSlug: string, locale: Locale): Promise<
  * Used to build hreflang alternates that never point at a 404
  * (tag pages don't fall back to English).
  */
-export async function localesForTag(tagSlug: string): Promise<Locale[]> {
+export async function localesForTag(tagSlug: string, { pagesOnly = false } = {}): Promise<Locale[]> {
   const all = await getCollection('wiki');
   const found = new Set<Locale>();
   for (const e of all) {
@@ -222,7 +223,11 @@ export async function localesForTag(tagSlug: string): Promise<Locale[]> {
       found.add(parsed.locale);
     }
   }
-  return Array.from(found);
+  // pagesOnly: drop locales where the tag folds into an article (no page there).
+  if (!pagesOnly) return Array.from(found);
+  const kept: Locale[] = [];
+  for (const l of found) if (!(await getTagRedirects(l)).has(tagSlug)) kept.push(l);
+  return kept;
 }
 
 /**
@@ -238,6 +243,31 @@ export async function tagLabelFor(tagSlug: string, locale: Locale): Promise<stri
     if (match) return match;
   }
   return null;
+}
+
+/**
+ * Tag slug → article the tag page folds into (see lib/tag-redirects.ts).
+ * Those tags get no page — the route skips them and astro.config writes the
+ * 301 — so every link to a tag must go through tagHref().
+ */
+let tagRedirectsCache: Promise<Map<string, Map<string, TagTarget>>> | undefined;
+export async function getTagRedirects(locale: Locale): Promise<Map<string, TagTarget>> {
+  tagRedirectsCache ??= getCollection('wiki').then((all) =>
+    computeTagRedirects(
+      all.filter(isPublished).flatMap((e) => {
+        const parsed = parseEntryId(e.id);
+        return parsed ? [{ locale: parsed.locale, category: parsed.category, slug: parsed.slug, tags: e.data.tags }] : [];
+      }),
+    ),
+  );
+  return (await tagRedirectsCache).get(locale) ?? new Map();
+}
+
+/** Link for a tag chip: the folded-into article, else the tag page. */
+export async function tagHref(tag: string, locale: Locale): Promise<string> {
+  const slug = slugifyTag(tag);
+  const t = (await getTagRedirects(locale)).get(slug);
+  return t ? detailPath(t.category, t.slug, locale) : tagPath(slug, locale);
 }
 
 // Staleness constants + predicate live in lib/content-utils.ts (pure,

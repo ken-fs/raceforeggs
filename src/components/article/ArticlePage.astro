@@ -31,11 +31,11 @@ import { NAVIGATION_CONFIG } from '~/config/navigation';
 import { siteUrl } from '~/config/site';
 import { type Locale } from '~/i18n/routing';
 import { getUi } from '~/i18n/ui';
-import { getRelatedEntries, getEntriesByCategory, isPossiblyOutdated, parseEntryId, slugifyTag, estimateReadMinutes, type WikiEntry, type ResolvedEntry } from '~/lib/content';
+import { getRelatedEntries, getEntriesByCategory, isPossiblyOutdated, parseEntryId, tagHref, estimateReadMinutes, type WikiEntry, type ResolvedEntry } from '~/lib/content';
 import LazyYouTube from '~/components/video/LazyYouTube.astro';
 import SponsorCard from '~/components/article/SponsorCard.astro';
 import { articleJsonLd, breadcrumbJsonLd, pageTitle, videoObjectJsonLd, imageObjectJsonLd, faqPageJsonLd } from '~/lib/seo';
-import { listPath, detailPath, tagPath, homeUrl } from '~/lib/url';
+import { listPath, detailPath, homeUrl } from '~/lib/url';
 import { site } from '~/config/site';
 import { getAuthor } from '~/config/authors';
 
@@ -72,6 +72,10 @@ const coverUrl = entry.data.image
 // page (locale=ja serving English) the requested-locale pool doesn't contain
 // this entry's siblings and "Related" would silently disappear.
 const related = await getRelatedEntries(entry, servedLocale, 3);
+// Tag chips: folded tags link straight to their article (lib/tag-redirects.ts).
+const tagLinks = await Promise.all(
+  entry.data.tags.map(async (tag: string) => ({ tag, href: await tagHref(tag, servedLocale) })),
+);
 
 // Visible codes FAQ — same strings feed faqPageJsonLd (marking up invisible
 // content violates Google's structured-data policy).
@@ -391,9 +395,9 @@ const jsonLd = [
     {
       entry.data.tags.length > 0 && (
         <div class="mt-8 flex flex-wrap gap-2">
-          {entry.data.tags.map((tag: string) => (
+          {tagLinks.map(({ tag, href }) => (
             <a
-              href={tagPath(slugifyTag(tag), servedLocale)}
+              href={href}
               class="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs text-foreground transition hover:bg-nav/15 hover:text-nav"
             >
               <Icon name="lucide:hash" class="h-3 w-3" />

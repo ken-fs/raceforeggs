@@ -9,6 +9,8 @@ import * as path from 'node:path';
 import { locales, defaultLocale } from './src/i18n/routing';
 import { CONTENT_TYPES } from './src/config/navigation';
 import { fallbackDetailPaths } from './src/lib/fallback-paths';
+import { computeTagRedirects, tagRedirectLines, type TagSourceEntry } from './src/lib/tag-redirects';
+import { parse as parseYaml } from 'yaml';
 
 /**
  * Build a map of page path → lastmod ISO date, read from MDX frontmatter
@@ -223,6 +225,52 @@ function alternatesFor(pagePath: string): Array<{ lang: string; url: string }> |
   return undefined;
 }
 
+/**
+ * Published entries' tags, read from MDX frontmatter at config time (same
+ * fs-scan constraint as buildLastmodMap). Feeds the tag → article 301s —
+ * the same computeTagRedirects() the tag routes use to skip those pages, so
+ * the built pages and the redirect table can't disagree.
+ */
+function collectTagSources(): TagSourceEntry[] {
+  const out: TagSourceEntry[] = [];
+  const base = path.resolve('./src/content/wiki');
+  if (!fs.existsSync(base)) return out;
+  for (const locale of fs.readdirSync(base)) {
+    const lDir = path.join(base, locale);
+    if (!fs.statSync(lDir).isDirectory()) continue;
+    for (const category of fs.readdirSync(lDir)) {
+      const cDir = path.join(lDir, category);
+      if (!fs.statSync(cDir).isDirectory()) continue;
+      for (const file of fs.readdirSync(cDir)) {
+        if (!file.endsWith('.mdx')) continue;
+        const fm = (parseYaml(extractFrontmatter(fs.readFileSync(path.join(cDir, file), 'utf8'))) ?? {}) as {
+          draft?: unknown;
+          tags?: unknown;
+        };
+        if (fm.draft === true) continue;
+        const tags = Array.isArray(fm.tags) ? fm.tags.filter((t): t is string => typeof t === 'string') : [];
+        out.push({ locale, category, slug: file.slice(0, -4), tags });
+      }
+    }
+  }
+  return out;
+}
+
+/** Appends the tag → article 301s to dist/_redirects (keeps any public/_redirects). */
+const tagRedirectsIntegration = {
+  name: 'tag-redirects',
+  hooks: {
+    'astro:build:done': ({ dir }: { dir: URL }) => {
+      const lines = tagRedirectLines(computeTagRedirects(collectTagSources()), defaultLocale);
+      if (!lines.length) return;
+      const file = new URL('_redirects', dir);
+      const kept = fs.existsSync(file) ? fs.readFileSync(file, 'utf8').trimEnd() : '';
+      const prev = kept ? `${kept}\n` : '';
+      fs.writeFileSync(file, `${prev}# tag pages folded into their article (src/lib/tag-redirects.ts)\n${lines.join('\n')}\n`);
+    },
+  },
+};
+
 // https://astro.build/config
 export default defineConfig({
   site: process.env.SITE_URL || 'https://anvil.wiki',
@@ -288,6 +336,7 @@ export default defineConfig({
     }),
     tailwind({ applyBaseStyles: false }),
     icon(),
+    tagRedirectsIntegration,
   ],
   vite: {
     resolve: {

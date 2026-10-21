@@ -18,6 +18,8 @@ export {
   getEntriesByTag,
   tagLabelFor,
   localesForTag,
+  getTagRedirects,
+  tagHref,
   type WikiEntry,
   type ResolvedEntry,
 } from '~/i18n/content';

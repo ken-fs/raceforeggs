@@ -208,6 +208,10 @@
         }
       ]
     },
+    "index": {
+      "title": "Browse the wiki",
+      "description": "Every page on the site, grouped by section."
+    },
     "explore": {
       "title": "Explore",
       "description": "The essentials",

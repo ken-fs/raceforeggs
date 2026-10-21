@@ -8,6 +8,7 @@
  * Sections (top to bottom):
  *   1. Hero          — title, description, CTAs (strong visual anchor)
  *   2. QuickStart    — 4 large icon cards (Codes / Bosses / Guides / Tier)
+ *   2b. Page index   — every article of each section (≥2 entries) as a link chip
  *   3. Recent Updates + Trending links (two columns)
  *   4. Explore       — 4 content modules with displayTypes
  *   5. ClosingCta      — bottom call-to-action
@@ -26,7 +27,7 @@ import { site } from '~/config/site';
 import { NAVIGATION_CONFIG } from '~/config/navigation';
 import { type Locale } from '~/i18n/routing';
 import { getUi, type HomeUi } from '~/i18n/ui';
-import { getRecentEntries, parseEntryId } from '~/lib/content';
+import { getEntriesByCategory, getRecentEntries, parseEntryId } from '~/lib/content';
 import { localizePath, listPath, detailPath } from '~/lib/url';
 
 interface Props {
@@ -45,6 +46,33 @@ const home = ui.home;
 const shared = ui.shared;
 
 const recent = await getRecentEntries(locale, 6);
+
+// Page index: one direct homepage link to every article. 2026-10-21
+// animemysterious: the homepage linked 0 of 33 unit pages and Google left
+// most of them "URL is unknown" for 9 days while thin tag pages ranked in
+// their place. Chip label = title before " — " ("Gilgamesh — Anime
+// Mysterious Unit Guide" → "Gilgamesh"), minus a leading game name ("Anime
+// Mysterious Battle Pass" → "Battle Pass"). Single-entry sections are
+// already reachable from Quick Start / nav.
+const gamePrefix = `${site.game.name.toLowerCase()} `;
+const shortTitle = (t: string) => {
+  const head = t.split(/\s+[—–|]\s+|:\s+/)[0]!.trim();
+  const rest = head.toLowerCase().startsWith(gamePrefix) ? head.slice(gamePrefix.length).trim() : '';
+  return rest || head;
+};
+const pageIndex = (
+  await Promise.all(
+    NAVIGATION_CONFIG.map(async (item) => ({
+      key: item.key,
+      label: ui.nav[item.key as keyof typeof ui.nav] ?? item.key,
+      entries: (await getEntriesByCategory(item.key, locale))
+        .map((entry) => ({ entry, parsed: parseEntryId(entry.id) }))
+        .filter((x) => x.parsed)
+        .map(({ entry, parsed }) => ({ href: detailPath(parsed!.category, parsed!.slug, locale), label: shortTitle(entry.data.title) }))
+        .sort((a, b) => a.label.localeCompare(b.label, locale)),
+    })),
+  )
+).filter((s) => s.entries.length >= 2);
 
 // Per-field fallbacks: a locale JSON whose meta object exists but lacks
 // title/description must not pass undefined into BaseLayout (title.includes
@@ -144,6 +172,39 @@ function trendingLabel(link: QuickLink): string {
     title={start.title}
     cards={start.cards}
   />
+
+  {/* ───────────────────────────── Page index ─────────────────────────── */}
+  {
+    pageIndex.length > 0 && (
+      <section class="section border-t border-border">
+        <h2 class="text-2xl">{home.index.title}</h2>
+        <p class="mt-1 text-sm text-muted-foreground">{home.index.description}</p>
+        <div class="mt-6 space-y-8">
+          {pageIndex.map((sec) => (
+            <div>
+              <div class="flex items-baseline justify-between">
+                <h3 class="text-lg font-bold">
+                  {sec.label} <span class="text-sm font-normal text-muted-foreground">({sec.entries.length})</span>
+                </h3>
+                <a href={listPath(sec.key, locale)} class="arrow-link text-sm font-semibold text-nav">
+                  {shared.browseAll} <span class="arrow">→</span>
+                </a>
+              </div>
+              <ul class="mt-3 flex flex-wrap gap-2">
+                {sec.entries.map((x) => (
+                  <li>
+                    <a href={x.href} class="card inline-block px-3 py-1.5 text-sm font-medium">
+                      {x.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
 
   {/* ───────────────────── Recent Updates + Trending ───────────────────── */}
   <section class="section border-t border-border">
