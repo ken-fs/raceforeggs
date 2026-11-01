@@ -144,7 +144,11 @@ const consentLabels = consent
   ? { title: consent.title, text: consent.text, accept: consent.accept, decline: consent.decline }
   : {
       title: sharedStrings.consentTitle ?? 'Cookies',
-      text: sharedStrings.consentText ?? 'We use cookies for analytics and ads.',
+      // Adsterra banners don't wait for this choice (2026-11-01); AdSense still does, so only an
+      // AdSense site mentions ads here. consentTextAds falls back to consentText for older locale files.
+      text: adsenseClient
+        ? (sharedStrings.consentTextAds ?? sharedStrings.consentText ?? 'We use cookies for analytics and ads.')
+        : (sharedStrings.consentText ?? 'We use cookies for analytics.'),
       accept: sharedStrings.accept ?? 'Accept',
       decline: sharedStrings.decline ?? 'Decline',
     };

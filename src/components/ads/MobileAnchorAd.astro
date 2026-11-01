@@ -14,10 +14,10 @@
  *   2. Zero CLS — `position: fixed` never shifts layout; on reveal a small
  *      bottom padding is added to <body> (mobile media query only) so the
  *      article's last block can't stay covered behind the bar.
- *   3. Consent-gated — the wrapped AdsterraSlot defers the iframe until
- *      consent (its own data-src mechanism), and THIS wrapper stays hidden
- *      until the same signal: declined or unchosen consent → neither ad nor
- *      empty bar ever appears.
+ *   3. Shown without waiting for the cookie banner (2026-11-01, same as
+ *      AdsterraSlot: the banner only gates GA / AdSense). The wrapped slot
+ *      loads only once the bar is visible, so a dismissed bar, or the
+ *      md:hidden bar on desktop, never loads an ad.
  *
  * Gated on PUBLIC_ADSTERRA_SLOT_STICKY_320X50: empty = nothing rendered
  * (zero-ad fork contract). Mounted on article pages only (ArticlePage).
@@ -29,12 +29,6 @@ import AdsterraSlot from './AdsterraSlot.astro';
 import { currentSharedStrings } from '~/lib/shared-ui';
 
 const show = !!import.meta.env.PUBLIC_ADSTERRA_SLOT_STICKY_320X50;
-// Same env condition under which BaseLayout renders CookieConsent — when
-// either is set the consent promise is live and the anchor must wait for it.
-const consentBannerActive = !!(
-  (import.meta.env.PUBLIC_GA_ID as string | undefined) ||
-  (import.meta.env.PUBLIC_ADSENSE_CLIENT as string | undefined)
-);
 const sharedStrings = currentSharedStrings(Astro.currentLocale);
 const closeAd = sharedStrings.closeAd ?? 'Close ad';
 // Astro hoists <style> tags out of JSX conditionals — a hoisted style would
@@ -72,7 +66,6 @@ const anchorCss = `
     <div
       id="mobile-anchor-ad"
       class="fixed inset-x-0 bottom-0 z-30 hidden border-t border-border bg-background/95 backdrop-blur md:hidden"
-      data-consent-deferred={consentBannerActive ? '1' : undefined}
     >
       <div class="relative mx-auto flex min-h-[58px] w-[320px] max-w-full items-center justify-center px-2">
         <AdsterraSlot name="sticky-320x50" width={320} height={50} label={false} />
@@ -97,17 +90,13 @@ const anchorCss = `
   show && (
     <script is:inline>
       /* ES2018 only (no optional chaining / nullish coalescing / optional
-         catch binding) — runs untranspiled in the HTML. Reveal-on-consent +
-         dismiss-with-memory: declined/unchosen consent keeps the anchor
-         hidden forever; dismissed hides it for good and drops the body
-         padding. Event + storage names mirror src/lib/shared-ui.ts (inline
-         scripts can't import). */
+         catch binding) — runs untranspiled in the HTML. Reveal +
+         dismiss-with-memory: dismissed hides it for good and drops the body
+         padding. Storage name mirrors nothing else (anchor-only key). */
       (function () {
         var ID = 'mobile-anchor-ad';
         var BTN_ID = 'dismiss-mobile-anchor';
         var DISMISS_KEY = 'mobile-anchor-dismissed';
-        var CONSENT_KEY = 'aw-cookie-consent';
-        var CONSENT_EVENT = 'aw:consent-accepted';
         var anchor = document.getElementById(ID);
         var btn = document.getElementById(BTN_ID);
         if (!anchor) return;
@@ -128,31 +117,7 @@ const anchorCss = `
           anchor.classList.remove('hidden');
           document.body.classList.add('has-mobile-anchor');
         };
-        var consentDeferred = anchor.getAttribute('data-consent-deferred') === '1';
-        var wireConsent = function () {
-          var stored = null;
-          try {
-            stored = localStorage.getItem(CONSENT_KEY);
-          } catch (e) {
-            /* treat as no consent yet */
-          }
-          if (stored === 'accepted') {
-            reveal();
-            return;
-          }
-          document.addEventListener(CONSENT_EVENT, reveal);
-        };
-        if (consentDeferred) {
-          if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', wireConsent);
-          } else {
-            wireConsent();
-          }
-        } else {
-          /* No tracking env → consent banner never renders → show directly
-             (out-of-box behavior: ads load without a consent step). */
-          reveal();
-        }
+        reveal();
         if (btn) {
           btn.addEventListener('click', function () {
             try {

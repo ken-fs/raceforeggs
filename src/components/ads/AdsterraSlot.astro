@@ -1,36 +1,41 @@
 ---
 /**
- * AdsterraSlot — an Adsterra ad unit mounted in a sandboxed iframe.
+ * AdsterraSlot — an Adsterra ad unit mounted in its own sandboxed iframe.
  *
  * Adsterra banner scripts all configure themselves through the shared
  * `window.atOptions` global, so two units inlined on one page clobber each
- * other (slot B renders with slot A's config). Every unit therefore lives in
- * its own static html file under `public/ads/` — `<name>.html`, holding
- * exactly the snippet from the Adsterra dashboard (Ad Units → GET CODE) —
- * and this component mounts it in an iframe. The sandbox omits
- * `allow-top-navigation` (some mobile creatives try to navigate the whole
- * page away) — but with `allow-scripts` + `allow-same-origin` both present
- * (creatives need them to render), the sandbox is layout containment and
- * navigation friction, NOT a hard security boundary against a malicious
- * creative; true isolation would take a separate origin. Full rationale:
- * docs/ads.md 「广告位怎么挂（独立文件 + iframe 隔离）」.
+ * other (slot B renders with slot A's config). Every unit therefore keeps
+ * exactly the snippet from the Adsterra dashboard (Ad Units → GET CODE) in
+ * its own file under `public/ads/<name>.html`, and this component mounts it
+ * as the iframe's `srcdoc` (read from that file at build time).
+ *
+ * 2026-11-01 changes (user decision, same as wowforever and the rest of the
+ * fleet; docs/ads.md 「广告位怎么挂」):
+ *  - No consent gate. The cookie banner only gates GA / AdSense. Waiting for
+ *    "Accept" meant most visitors never loaded a single Adsterra unit (on
+ *    wowforever: $0.01 of ad revenue for all of October). The privacy page
+ *    says Adsterra banners don't depend on the banner choice.
+ *  - srcdoc instead of src="/ads/<name>.html" and NO `allow-same-origin`.
+ *    The old same-origin file + allow-same-origin let the creative's script
+ *    reach this page; a srcdoc frame without that flag is an opaque origin,
+ *    and creatives still render (fleet-wide, all Next sites run this way).
+ *    It also stops Cloudflare injecting its analytics beacon into the ad
+ *    frame (that beacon failed CORS in an opaque frame, and before that
+ *    counted every ad frame as a page view).
+ *  - Loads only when visible. srcdoc ignores loading="lazy", so a tiny inline
+ *    script fills it from an IntersectionObserver once the slot is within
+ *    600px of the viewport. A display:none slot (hideOnMobile on a phone, the
+ *    hidden MobileAnchorAd bar, a dismissed anchor) never intersects, so it
+ *    never loads: no impressions for ads nobody can see.
  *
  * Gated on PUBLIC_ADSTERRA_SLOT_<NAME> (name upper-cased, hyphens become
  * underscores — `sidebar-300x250` → `PUBLIC_ADSTERRA_SLOT_SIDEBAR_300X250`).
  * Empty = nothing rendered, the same env contract as the AdSense slots. The
- * html file itself is not build inputs — also create it in `public/ads/` or
- * the iframe 404s as an empty box.
- *
- * Consent-gated like GA/AdSense: when the cookie banner is active (its own
- * render condition in BaseLayout = PUBLIC_GA_ID or PUBLIC_ADSENSE_CLIENT
- * set), the iframe mounts WITHOUT src (data-src holds the real URL) and a
- * small ES2018 inline script promotes data-src → src only after the visitor
- * has consented — either a stored 'accepted' in CookieConsent's localStorage
- * flag, or the `aw:consent-accepted` event it dispatches on accept. Declined
- * or unchosen → the unit never loads, matching the banner's promise that
- * ads wait for consent. No tracking env vars → banner never renders → the
- * iframe loads directly (out-of-box zero-consent behavior unchanged).
+ * html file must exist in `public/ads/`; a missing file renders nothing
+ * (and warns at build time) instead of an empty box.
  */
+import { existsSync, readFileSync } from 'node:fs';
+
 interface Props {
   /** Slot name = html filename stem under public/ads/ (e.g. `sidebar-300x250`). */
   name: string;
@@ -53,14 +58,14 @@ import { currentSharedStrings } from '~/lib/shared-ui';
 
 const { name, width, height, label = true, hideOnMobile = false } = Astro.props;
 const envKey = `PUBLIC_ADSTERRA_SLOT_${name.replace(/-/g, '_').toUpperCase()}`;
-const show = !!import.meta.env[envKey];
-// Same env condition under which BaseLayout renders CookieConsent — when
-// either is set the banner (and its consent promise) is live on every page.
-const consentBannerActive = !!(
-  (import.meta.env.PUBLIC_GA_ID as string | undefined) ||
-  (import.meta.env.PUBLIC_ADSENSE_CLIENT as string | undefined)
-);
-const iframeSrc = `/ads/${name}.html`;
+// Builds run from the repo root (local and Cloudflare / GitHub Actions alike).
+const file = `${process.cwd()}/public/ads/${name}.html`;
+const hasFile = existsSync(file);
+if (import.meta.env[envKey] && !hasFile) {
+  console.warn(`[AdsterraSlot] ${envKey} is set but public/ads/${name}.html is missing — slot not rendered`);
+}
+const show = !!import.meta.env[envKey] && hasFile;
+const srcdoc = show ? readFileSync(file, 'utf8') : '';
 const sharedStrings = currentSharedStrings(Astro.currentLocale);
 const adLabel = sharedStrings.adLabel ?? 'Advertisement';
 ---
@@ -77,62 +82,55 @@ const adLabel = sharedStrings.adLabel ?? 'Advertisement';
           <span class="mb-1 text-[10px] uppercase tracking-wider text-muted-foreground">{adLabel}</span>
         )}
         <iframe
-          src={consentBannerActive ? undefined : iframeSrc}
-          data-src={consentBannerActive ? iframeSrc : undefined}
-          data-adsterra-defer={consentBannerActive ? '1' : undefined}
+          data-ad-srcdoc={srcdoc}
           style={`width:100%;max-width:${width}px;height:${height}px;border:0`}
-          loading="lazy"
-          sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+          scrolling="no"
+          sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms"
           title={adLabel}
         />
       </div>
-      {consentBannerActive && (
-        <script is:inline>
-          /* ES2018 only (no optional chaining / nullish coalescing / optional
-             catch binding) — runs untranspiled in the HTML, old webviews parse
-             it. Consent-gated deferred load: promotes data-src → src on every
-             pending Adsterra iframe once the visitor has consented. Declined
-             or unchosen → never loads (same contract as __awLoadTrackers for
-             GA/AdSense). Idempotent: each slot ships one copy of this script;
-             only iframes still carrying data-adsterra-defer are touched.
-             Event + storage key mirror src/lib/shared-ui.ts (inline scripts
-             can't import). */
-          (function () {
-            var CONSENT_KEY = 'aw-cookie-consent';
-            var CONSENT_EVENT = 'aw:consent-accepted';
-            var activate = function () {
-              var pending = document.querySelectorAll('iframe[data-adsterra-defer]');
-              for (var i = 0; i < pending.length; i++) {
-                var frame = pending[i];
-                var src = frame.getAttribute('data-src');
-                if (src) {
-                  frame.src = src;
-                }
-                frame.removeAttribute('data-adsterra-defer');
-                frame.removeAttribute('data-src');
+      <script is:inline>
+        /* ES2018 only (no optional chaining / nullish coalescing / optional
+           catch binding) — runs untranspiled in the HTML, old webviews parse
+           it. Fills srcdoc once the slot is visible and within 600px of the
+           viewport; display:none slots never intersect, so they never load.
+           Idempotent: every slot ships one copy, each only touches frames
+           still carrying data-ad-srcdoc. */
+        (function () {
+          var fill = function (frame) {
+            var html = frame.getAttribute('data-ad-srcdoc');
+            if (!html) return;
+            frame.removeAttribute('data-ad-srcdoc');
+            frame.srcdoc = html;
+          };
+          var run = function () {
+            var frames = document.querySelectorAll('iframe[data-ad-srcdoc]');
+            if (!('IntersectionObserver' in window)) {
+              for (var i = 0; i < frames.length; i++) {
+                if (frames[i].offsetParent) fill(frames[i]);
               }
-            };
-            var wire = function () {
-              var stored = null;
-              try {
-                stored = localStorage.getItem(CONSENT_KEY);
-              } catch (e) {
-                /* storage unavailable — treat as no consent yet */
-              }
-              if (stored === 'accepted') {
-                activate();
-                return;
-              }
-              document.addEventListener(CONSENT_EVENT, activate);
-            };
-            if (document.readyState === 'loading') {
-              document.addEventListener('DOMContentLoaded', wire);
-            } else {
-              wire();
+              return;
             }
-          })();
-        </script>
-      )}
+            var io = new IntersectionObserver(
+              function (entries) {
+                for (var i = 0; i < entries.length; i++) {
+                  if (entries[i].isIntersecting) {
+                    fill(entries[i].target);
+                    io.unobserve(entries[i].target);
+                  }
+                }
+              },
+              { rootMargin: '600px 0px' }
+            );
+            for (var j = 0; j < frames.length; j++) io.observe(frames[j]);
+          };
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', run);
+          } else {
+            run();
+          }
+        })();
+      </script>
     </>
   )
 }
