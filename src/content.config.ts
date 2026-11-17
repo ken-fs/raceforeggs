@@ -2,6 +2,7 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { CONTENT_TYPES } from './config/navigation';
+import { fillMonth } from './lib/title-month';
 
 /**
  * Wiki content collection.
@@ -131,7 +132,9 @@ const wiki = defineCollection({
           }),
         )
         .optional(),
-    }),
+    })
+    // `{month}` in title / description / summary / faq → month of lastModified (src/lib/title-month.ts)
+    .transform(fillMonth),
 });
 
 /**
